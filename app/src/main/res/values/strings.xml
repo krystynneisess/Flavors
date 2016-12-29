@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Yogurt Park Flavors</string>
+    <string name="see_flavors">See Today\'s Flavors!</string>
+    <string name="retrieving_flavors">Retrieving today\'s flavors...</string>
+</resources>
