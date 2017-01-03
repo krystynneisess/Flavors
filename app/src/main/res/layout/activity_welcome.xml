@@ -11,10 +11,26 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.sandbox.k.yogurtparkflavors.WelcomeActivity">
 
+    <TextView
+        android:id="@+id/debug_vals"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_debug_yet"/>
+
     <Button
         android:id="@+id/see_flavors_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/see_flavors"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp" />
+
 </LinearLayout>

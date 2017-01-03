@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 
 import java.io.IOException;
@@ -27,6 +28,9 @@ public class FlavorsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_flavors);
         context = getApplicationContext();
 
@@ -37,6 +41,9 @@ public class FlavorsActivity extends AppCompatActivity {
         if (retrievedFlavors == null) {
             retrievedFlavors = "No flavors found.";
         }
+
+        retrievedFlavors = String.format("AccessToken:  %s\n\n", AccessToken
+                .getCurrentAccessToken().getToken()) + retrievedFlavors;
 
         flavorsList.setText(retrievedFlavors);
     }
