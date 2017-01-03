@@ -3,6 +3,7 @@
 
     <string name="facebook_app_id">168301390315073</string>
     <string name="fb_login_protocol_scheme">fb168301390315073</string>
+    <string name="graph_request">https://graph.facebook.com/v2.8/YogurtPark/posts</string>
 
     <string name="see_flavors">See Today\'s Flavors!</string>
     <string name="retrieving_flavors">Retrieving today\'s flavors...</string>

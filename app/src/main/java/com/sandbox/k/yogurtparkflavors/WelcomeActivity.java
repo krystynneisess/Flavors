@@ -25,48 +25,36 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Initializations
         FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(getApplication());
-        callbackManager = CallbackManager.Factory.create();
-
         setContentView(R.layout.activity_welcome);
 
-        /*************************
-         * Other UI handling
-         *************************
-         */
-        // Initialize flavors button OnClickListener
-        final Button flavorsBtn = (Button) findViewById(R.id.see_flavors_btn);
-        flavorsBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent seeFlavorsIntent = new Intent(WelcomeActivity.this, FlavorsActivity.class);
-                startActivity(seeFlavorsIntent);
-            }
-        });
-
-        // Initialize debug TextView
+        // Get Views
+        LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
+        final Button flavorsButton = (Button) findViewById(R.id.see_flavors_btn);
         final TextView debugTV = (TextView) findViewById(R.id.debug_vals);
+
 
         /*************************
          * Facebook login handling
          *************************
          */
+        // Initialize app logging and CallbackManager
+        AppEventsLogger.activateApp(getApplication());
+        callbackManager = CallbackManager.Factory.create();
+
         // Initialize AccessTokenTracker
         accessTokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
                 if (currentAccessToken == null) {
                     // User has logged out.
-                    flavorsBtn.setVisibility(View.GONE);
+                    flavorsButton.setVisibility(View.GONE);
                 }
             }
         };
 
 
-        // Initialize login button and callback handlers
-        LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
-
+        // Register login callback
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -74,7 +62,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 String accessToken = loginResult.getAccessToken().getToken();
 
                 debugTV.setText(String.format("id:  %s\naccessToken:  %s", id, accessToken));
-                flavorsBtn.setVisibility(View.VISIBLE);
+                flavorsButton.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -87,6 +75,24 @@ public class WelcomeActivity extends AppCompatActivity {
                 debugTV.setText("Login failed.");
             }
         });
+
+
+        /*************************
+         * Other UI handling
+         *************************
+         */
+        // Initialize flavors button OnClickListener
+        flavorsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent seeFlavorsIntent = new Intent(WelcomeActivity.this, FlavorsActivity.class);
+                startActivity(seeFlavorsIntent);
+            }
+        });
+
+        // Reveal flavors button if logged in already
+        if (AccessToken.getCurrentAccessToken() != null) {
+            flavorsButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
