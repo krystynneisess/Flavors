@@ -63,7 +63,7 @@ public class FlavorJobService extends JobService {
                 while (i++ < 10) {
                     try {
                         Log.i(TAG, "*** Service is RUNNING!  Loop #" + i);
-                        sleep(500);
+                        sleep(3);
                     } catch (InterruptedException e) {
                         Log.d(TAG, e.getMessage());
                     }

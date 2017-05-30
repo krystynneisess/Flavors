@@ -27,16 +27,43 @@ import com.facebook.login.widget.LoginButton;
 
 public class WelcomeActivity extends AppCompatActivity {
     final String TAG_DEBUG = "TAG_DEBUG";
+
+    // Facebook API globals
     CallbackManager callbackManager;
     AccessTokenTracker accessTokenTracker;
 
+    // Flavor service globals
     ComponentName mFlavorServiceComponent;
     int mJobId;
     JobScheduler mJobScheduler;
+    boolean mServiceToggleValue;
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean("mServiceToggleValue", mServiceToggleValue);
+        Log.d(TAG_DEBUG, "***** Saved state!  toggleVal = " + mServiceToggleValue);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        mServiceToggleValue = savedInstanceState.getBoolean("mServiceToggleValue");
+        Log.d(TAG_DEBUG, "***** onRestoreInstanceState():  restored state!  toggleVal = " +
+                mServiceToggleValue);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Recover state
+//        Log.d(TAG_DEBUG, "***** onCreate: about to restore state!");
+//        if (savedInstanceState != null) {
+//            mServiceToggleValue = savedInstanceState.getBoolean("mServiceToggleValue");
+//            Log.d(TAG_DEBUG, "***** Restored state!  toggleVal = " + mServiceToggleValue);
+//        } else {
+//            mServiceToggleValue = false;
+//            Log.d(TAG_DEBUG, "***** DID NOT restore state!  toggleVal = " + mServiceToggleValue);
+//        }
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_welcome);
 
@@ -45,6 +72,7 @@ public class WelcomeActivity extends AppCompatActivity {
         final Button flavorsButton = (Button) findViewById(R.id.see_flavors_btn);
         final TextView debugTV = (TextView) findViewById(R.id.debug_vals);
         final ToggleButton serviceToggle = (ToggleButton) findViewById(R.id.service_toggle);
+        serviceToggle.setChecked(mServiceToggleValue);
 
         /*************************
          * Service initializations
@@ -72,7 +100,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 }
             }
         };
-
 
         // Register login callback
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -106,8 +133,12 @@ public class WelcomeActivity extends AppCompatActivity {
 //        }
 
         // Initalize service button state change listener
-        serviceToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        serviceToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean isChecked = serviceToggle.isChecked();
+                mServiceToggleValue = isChecked;
+
                 if (isChecked) {
                     // The toggle is enabled
                     Log.d(TAG_DEBUG, "*** Toggle is now ON!");
@@ -122,6 +153,22 @@ public class WelcomeActivity extends AppCompatActivity {
                 }
             }
         });
+//        serviceToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) {
+//                    // The toggle is enabled
+//                    Log.d(TAG_DEBUG, "*** Toggle is now ON!");
+//                    // Start service!
+//                    scheduleJob();
+//                } else {
+//                    // The toggle is disabled
+//                    Log.d(TAG_DEBUG, "*** Toggle is now OFF!");
+//                    // End services
+//                    // TODO:  don't use janky JobScheduler.cancelAll()
+////                    mJobScheduler.cancelAll();
+//                }
+//            }
+//        });
 
         // Initialize flavors button OnClickListener
         flavorsButton.setOnClickListener(new View.OnClickListener() {
