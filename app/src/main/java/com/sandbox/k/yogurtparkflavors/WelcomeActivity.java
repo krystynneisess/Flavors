@@ -1,12 +1,19 @@
 package com.sandbox.k.yogurtparkflavors;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ActionMode;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -19,8 +26,13 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 public class WelcomeActivity extends AppCompatActivity {
+    final String TAG_DEBUG = "TAG_DEBUG";
     CallbackManager callbackManager;
     AccessTokenTracker accessTokenTracker;
+
+    ComponentName mFlavorServiceComponent;
+    int mJobId;
+    JobScheduler mJobScheduler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +44,15 @@ public class WelcomeActivity extends AppCompatActivity {
         LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
         final Button flavorsButton = (Button) findViewById(R.id.see_flavors_btn);
         final TextView debugTV = (TextView) findViewById(R.id.debug_vals);
+        final ToggleButton serviceToggle = (ToggleButton) findViewById(R.id.service_toggle);
 
+        /*************************
+         * Service initializations
+         *************************
+         */
+        mJobId = 0;
+        mFlavorServiceComponent = new ComponentName(this, FlavorJobService.class);
+        mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
         /*************************
          * Facebook login handling
@@ -81,6 +101,28 @@ public class WelcomeActivity extends AppCompatActivity {
          * Other UI handling
          *************************
          */
+//        if (!serviceToggle.isChecked()) {
+//            mJobScheduler.cancelAll();
+//        }
+
+        // Initalize service button state change listener
+        serviceToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled
+                    Log.d(TAG_DEBUG, "*** Toggle is now ON!");
+                    // Start service!
+                    scheduleJob();
+                } else {
+                    // The toggle is disabled
+                    Log.d(TAG_DEBUG, "*** Toggle is now OFF!");
+                    // End services
+                    // TODO:  don't use janky JobScheduler.cancelAll()
+//                    mJobScheduler.cancelAll();
+                }
+            }
+        });
+
         // Initialize flavors button OnClickListener
         flavorsButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -100,4 +142,21 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
+
+    /*************************
+     * Service Scheduling Helpers
+     *************************
+     */
+
+    public void scheduleJob() {
+        // Initialize builder
+        JobInfo.Builder builder = new JobInfo.Builder(mJobId++, mFlavorServiceComponent);
+        // TODO:  add timing/network requirements to builder
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+
+        // Schedule job
+        mJobScheduler.schedule(builder.build());
+    }
+
+
 }
