@@ -9,4 +9,6 @@
     <string name="retrieving_flavors">Retrieving today\'s flavors...</string>
     <string name="no_debug_yet">No debug values yet.</string>
     <string name="service_toggle_label">Services are...</string>
+
+    <string name="service_toggle_key">mServiceToggleValue</string>
 </resources>

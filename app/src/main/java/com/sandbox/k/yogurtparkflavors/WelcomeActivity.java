@@ -5,6 +5,7 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ActionMode;
@@ -38,16 +39,39 @@ public class WelcomeActivity extends AppCompatActivity {
     JobScheduler mJobScheduler;
     boolean mServiceToggleValue;
 
+//    @Override
+//    public void onSaveInstanceState(Bundle savedInstanceState) {
+//        savedInstanceState.putBoolean("mServiceToggleValue", mServiceToggleValue);
+//        Log.d(TAG_DEBUG, "***** Saved state!  toggleVal = " + mServiceToggleValue);
+//    }
+//
+//    @Override
+//    public void onRestoreInstanceState(Bundle savedInstanceState) {
+//        mServiceToggleValue = savedInstanceState.getBoolean("mServiceToggleValue");
+//        Log.d(TAG_DEBUG, "***** onRestoreInstanceState():  restored state!  toggleVal = " +
+//                mServiceToggleValue);
+//    }
+
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean("mServiceToggleValue", mServiceToggleValue);
+    public void onStop() {
+        super.onStop();
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(getString(R.string.service_toggle_key), mServiceToggleValue);
+        editor.commit();
         Log.d(TAG_DEBUG, "***** Saved state!  toggleVal = " + mServiceToggleValue);
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        mServiceToggleValue = savedInstanceState.getBoolean("mServiceToggleValue");
-        Log.d(TAG_DEBUG, "***** onRestoreInstanceState():  restored state!  toggleVal = " +
+    public void onStart() {
+        super.onStart();
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        mServiceToggleValue = sharedPref.getBoolean(getString(R.string.service_toggle_key), false);
+
+        ToggleButton serviceToggle = (ToggleButton) findViewById(R.id.service_toggle);
+        serviceToggle.setChecked(mServiceToggleValue);
+
+        Log.d(TAG_DEBUG, "***** Restored state!  toggleVal = " +
                 mServiceToggleValue);
     }
 
@@ -72,7 +96,7 @@ public class WelcomeActivity extends AppCompatActivity {
         final Button flavorsButton = (Button) findViewById(R.id.see_flavors_btn);
         final TextView debugTV = (TextView) findViewById(R.id.debug_vals);
         final ToggleButton serviceToggle = (ToggleButton) findViewById(R.id.service_toggle);
-        serviceToggle.setChecked(mServiceToggleValue);
+//        serviceToggle.setChecked(mServiceToggleValue);
 
         /*************************
          * Service initializations
