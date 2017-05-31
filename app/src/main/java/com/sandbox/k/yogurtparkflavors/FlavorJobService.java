@@ -52,25 +52,42 @@ public class FlavorJobService extends JobService {
 //        long duration = params.getExtras().getLong(WORK_DURATION_KEY);
 
         // Uses a handler to delay the execution of jobFinished().
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
+//        Handler handler = new Handler();
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                // Service actions here!
+////                sendMessage(MSG_COLOR_STOP, params.getJobId());
+////                jobFinished(params, false);
+//                int i = 0;
+//                while (i++ < 10) {
+//                    try {
+//                        Log.i(TAG, "*** Service is RUNNING!  Loop #" + i);
+//                        sleep(3);
+//                    } catch (InterruptedException e) {
+//                        Log.d(TAG, e.getMessage());
+//                    }
+//                }
+//            }
+//        }, 0);
+
+        new Thread(new Runnable() {
             public void run() {
-                // Service actions here!
-//                sendMessage(MSG_COLOR_STOP, params.getJobId());
-//                jobFinished(params, false);
+                // a potentially  time consuming task
                 int i = 0;
-                while (i++ < 10) {
+                while (i++ < 3) {
                     try {
                         Log.i(TAG, "*** Service is RUNNING!  Loop #" + i);
-                        sleep(3);
+                        sleep(5);
                     } catch (InterruptedException e) {
                         Log.d(TAG, e.getMessage());
                     }
                 }
             }
-        }, 0);
+        }).start();
+
         Log.i(TAG, "on start job: " + params.getJobId());
+        jobFinished(params, false);
 
         // Return true as there's more work to be done with this job.
         return true;
@@ -83,8 +100,8 @@ public class FlavorJobService extends JobService {
         Log.i(TAG, "*** Service has been FORCEFULLY STOPPED!");
         Log.i(TAG, "on stop job: " + params.getJobId());
 
-        // Return false to drop the job.
-        return false;
+        // Return false to drop the job; true to reschedule.
+        return true;
     }
 
 

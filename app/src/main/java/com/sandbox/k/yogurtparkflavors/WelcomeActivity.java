@@ -168,12 +168,14 @@ public class WelcomeActivity extends AppCompatActivity {
                     Log.d(TAG_DEBUG, "*** Toggle is now ON!");
                     // Start service!
                     scheduleJob();
+                    Log.d(TAG_DEBUG, "*** Service SCHEDULED!");
                 } else {
                     // The toggle is disabled
                     Log.d(TAG_DEBUG, "*** Toggle is now OFF!");
                     // End services
                     // TODO:  don't use janky JobScheduler.cancelAll()
-//                    mJobScheduler.cancelAll();
+                    mJobScheduler.cancelAll();
+                    Log.d(TAG_DEBUG, "*** Service SCHEDULED!");
                 }
             }
         });
@@ -224,6 +226,7 @@ public class WelcomeActivity extends AppCompatActivity {
         JobInfo.Builder builder = new JobInfo.Builder(mJobId++, mFlavorServiceComponent);
         // TODO:  add timing/network requirements to builder
         builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        builder.setPeriodic(1000);
 
         // Schedule job
         mJobScheduler.schedule(builder.build());
