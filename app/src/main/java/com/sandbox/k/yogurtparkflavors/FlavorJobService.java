@@ -2,12 +2,26 @@ package com.sandbox.k.yogurtparkflavors;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Messenger;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import android.os.Handler;
+import android.widget.TextView;
+
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static java.lang.Thread.sleep;
 
@@ -17,12 +31,16 @@ import static java.lang.Thread.sleep;
 
 public class FlavorJobService extends JobService {
     private static final String TAG = FlavorJobService.class.getSimpleName();
+    private static Context context;
 
 //    private Messenger mActivityMessenger;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        context = getApplicationContext();
+
         Log.i(TAG, "Service created");
     }
 
@@ -48,43 +66,29 @@ public class FlavorJobService extends JobService {
         // the job (on another thread).
 
 //        sendMessage(MSG_COLOR_START, params.getJobId());
-//
-//        long duration = params.getExtras().getLong(WORK_DURATION_KEY);
-
-        // Uses a handler to delay the execution of jobFinished().
-//        Handler handler = new Handler();
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                // Service actions here!
-////                sendMessage(MSG_COLOR_STOP, params.getJobId());
-////                jobFinished(params, false);
-//                int i = 0;
-//                while (i++ < 10) {
-//                    try {
-//                        Log.i(TAG, "*** Service is RUNNING!  Loop #" + i);
-//                        sleep(3);
-//                    } catch (InterruptedException e) {
-//                        Log.d(TAG, e.getMessage());
-//                    }
-//                }
-//            }
-//        }, 0);
 
         new Thread(new Runnable() {
             public void run() {
                 // a potentially  time consuming task
-                int i = 0;
-                while (i++ < 3) {
-                    try {
-                        Log.i(TAG, "*** Service is RUNNING!  Loop #" + i);
-                        sleep(5);
-                    } catch (InterruptedException e) {
-                        Log.d(TAG, e.getMessage());
-                    }
-                }
+//                int i = 0;
+//                while (i++ < 3) {
+//                    try {
+//                        Log.i(TAG, "*** Service is RUNNING!  Loop #" + i);
+//                        sleep(5);
+//                    } catch (InterruptedException e) {
+//                        Log.d(TAG, e.getMessage());
+//                    }
+//                }
+
+                // Retrieve flavors!
+                retrieveFlavors();
             }
         }).start();
+
+
+
+
+
 
         Log.i(TAG, "on start job: " + params.getJobId());
         jobFinished(params, false);
@@ -104,6 +108,51 @@ public class FlavorJobService extends JobService {
         return true;
     }
 
+    /*************************
+     * Flavor retrieval helpers
+     *************************
+     */
+    private void retrieveFlavors() {
+        // Generate Graph API Request
+        GraphRequest request = new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/YogurtPark/posts",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback() {
+                    // Handle request response
+                    @Override
+                    public void onCompleted(GraphResponse response) {
+                        JSONObject jsonObject = response.getJSONObject();
+
+                        String flavorData = jsonToFlavorsString(jsonObject);
+
+//                        TextView flavorsList = (TextView) findViewById(R.id.flavors_list);
+//                        flavorsList.setText(flavorData);
+
+                        Log.d(TAG, "flavorData:  " + flavorData);
+                    }
+                });
+
+        request.executeAsync();
+    }
+
+    /* Helper.  Extracts most recent post's message from the above GraphResponse's
+     * JSONObject. */
+    private String jsonToFlavorsString(JSONObject jsonObject) {
+        String flavorsString = null;
+
+        try {
+            JSONArray data = jsonObject.getJSONArray("data");
+            JSONObject newestPost = data.getJSONObject(0);
+            flavorsString = newestPost.getString("message");
+
+        } catch (JSONException e) {
+            Log.d(TAG, e.getMessage());
+        }
+
+        return flavorsString;
+    }
 
 
 //    private void sendMessage(int messageID, @Nullable Object params) {
